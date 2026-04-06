@@ -47,5 +47,14 @@ extension StructuredText {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var listItemStyle: any StructuredText.ListItemStyle = .default
+  var listItemStyle: any StructuredText.ListItemStyle {
+    get { self[ListItemStyleKey.self] }
+    set { self[ListItemStyleKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct ListItemStyleKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: any StructuredText.ListItemStyle { .default }
 }

@@ -57,6 +57,21 @@ public protocol AttachmentLoader: Sendable {
 }
 
 extension EnvironmentValues {
-  @Entry var imageAttachmentLoader: any AttachmentLoader = .image()
-  @Entry var emojiAttachmentLoader: any AttachmentLoader = .emoji()
+  var imageAttachmentLoader: any AttachmentLoader {
+    get { self[ImageAttachmentLoaderKey.self] }
+    set { self[ImageAttachmentLoaderKey.self] = newValue }
+  }
+
+  var emojiAttachmentLoader: any AttachmentLoader {
+    get { self[EmojiAttachmentLoaderKey.self] }
+    set { self[EmojiAttachmentLoaderKey.self] = newValue }
+  }
+}
+
+private struct ImageAttachmentLoaderKey: EnvironmentKey {
+  static var defaultValue: any AttachmentLoader { .image() }
+}
+
+private struct EmojiAttachmentLoaderKey: EnvironmentKey {
+  static var defaultValue: any AttachmentLoader { .emoji() }
 }

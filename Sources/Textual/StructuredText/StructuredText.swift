@@ -122,9 +122,7 @@ public struct StructuredText: View {
         .modifier(TextSelectionCoordination())
     }
     .coordinateSpace(.textContainer)
-    .onChange(of: markup, initial: true) {
-      markupDidChange(markup)
-    }
+    .onChangeInitialCompat(of: markup, perform: markupDidChange)
     // Disable line limit to avoid per-fragment truncation
     .lineLimit(nil)
   }

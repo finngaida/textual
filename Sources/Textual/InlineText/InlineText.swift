@@ -118,7 +118,7 @@ public struct InlineText: View {
       }
     }
     .coordinateSpace(.textContainer)
-    .onChange(of: markup, initial: true) { _, value in
+    .onChangeInitialCompat(of: markup) { value in
       self.attributedString = (try? parser.attributedString(for: value)) ?? .init()
     }
   }

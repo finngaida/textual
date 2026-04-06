@@ -25,7 +25,7 @@ struct TextSelectionInteraction: ViewModifier {
         content
           .overlayTextLayoutCollection { layoutCollection in
             Color.clear
-              .onChange(of: AnyTextLayoutCollection(layoutCollection), initial: true) {
+              .onChangeInitialCompat(of: AnyTextLayoutCollection(layoutCollection)) { _ in
                 model.setCoordinator(coordinator)
                 model.setLayoutCollection(layoutCollection)
               }
@@ -41,10 +41,19 @@ struct TextSelectionInteraction: ViewModifier {
 }
 
 #if TEXTUAL_ENABLE_TEXT_SELECTION
+  @usableFromInline
+  struct TextSelectionKey: EnvironmentKey {
+    @usableFromInline
+    static var defaultValue: TextSelectionMode { .disabled }
+  }
+
   extension EnvironmentValues {
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     @usableFromInline
-    @Entry var textSelection: any TextSelectability.Type = DisabledTextSelectability.self
+    var textSelection: TextSelectionMode {
+      get { self[TextSelectionKey.self] }
+      set { self[TextSelectionKey.self] = newValue }
+    }
   }
 #endif

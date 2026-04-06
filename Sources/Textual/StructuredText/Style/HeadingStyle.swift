@@ -35,5 +35,14 @@ extension StructuredText {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var headingStyle: any StructuredText.HeadingStyle = .default
+  var headingStyle: any StructuredText.HeadingStyle {
+    get { self[HeadingStyleKey.self] }
+    set { self[HeadingStyleKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct HeadingStyleKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: any StructuredText.HeadingStyle { .default }
 }

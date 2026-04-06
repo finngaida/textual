@@ -25,7 +25,16 @@ extension StructuredText {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var orderedListMarker: any StructuredText.OrderedListMarker = .decimal
+  var orderedListMarker: any StructuredText.OrderedListMarker {
+    get { self[OrderedListMarkerKey.self] }
+    set { self[OrderedListMarkerKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct OrderedListMarkerKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: any StructuredText.OrderedListMarker { .decimal }
 }
 
 // MARK: - Decimal

@@ -23,7 +23,16 @@ extension StructuredText {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var unorderedListMarker: any StructuredText.UnorderedListMarker = .disc
+  var unorderedListMarker: any StructuredText.UnorderedListMarker {
+    get { self[UnorderedListMarkerKey.self] }
+    set { self[UnorderedListMarkerKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct UnorderedListMarkerKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: any StructuredText.UnorderedListMarker { .disc }
 }
 
 // MARK: - Symbol

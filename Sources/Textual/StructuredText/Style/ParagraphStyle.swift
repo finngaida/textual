@@ -17,5 +17,14 @@ extension StructuredText {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var paragraphStyle: any StructuredText.ParagraphStyle = .default
+  var paragraphStyle: any StructuredText.ParagraphStyle {
+    get { self[ParagraphStyleKey.self] }
+    set { self[ParagraphStyleKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct ParagraphStyleKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: any StructuredText.ParagraphStyle { .default }
 }

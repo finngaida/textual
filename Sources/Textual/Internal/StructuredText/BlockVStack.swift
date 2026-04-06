@@ -20,11 +20,19 @@ extension StructuredText {
     }
 
     var body: some View {
-      Group(subviews: content) { children in
-        BlockVStackLayout(textAlignment: textAlignment) {
-          ForEach(children) {
-            BlockLayoutView($0)
-          }
+      _VariadicView.Tree(BlockVStackRoot(textAlignment: textAlignment)) {
+        content
+      }
+    }
+  }
+
+  private struct BlockVStackRoot: _VariadicView_MultiViewRoot {
+    let textAlignment: TextAlignment
+
+    func body(children: _VariadicView.Children) -> some View {
+      BlockVStackLayout(textAlignment: textAlignment) {
+        ForEach(children) {
+          BlockLayoutView($0)
         }
       }
     }
@@ -51,9 +59,11 @@ extension StructuredText {
     var body: some View {
       // Read the block spacing preference and apply it as a layout value
       content
-        .onPreferenceChange(BlockSpacingKey.self) { @MainActor value in
-          // Override with the resolved list item spacing if enabled
-          blockSpacing = listItemSpacingEnabled ? resolvedListItemSpacing : value
+        .onPreferenceChange(BlockSpacingKey.self) { value in
+          Task { @MainActor in
+            // Override with the resolved list item spacing if enabled
+            blockSpacing = listItemSpacingEnabled ? resolvedListItemSpacing : value
+          }
         }
         .layoutValue(key: BlockSpacingKey.self, value: blockSpacing)
     }

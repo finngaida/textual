@@ -26,5 +26,12 @@ public struct EmojiProperties: Sendable, Hashable {
 }
 
 extension EnvironmentValues {
-  @Entry var emojiProperties = EmojiProperties()
+  var emojiProperties: EmojiProperties {
+    get { self[EmojiPropertiesKey.self] }
+    set { self[EmojiPropertiesKey.self] = newValue }
+  }
+}
+
+private struct EmojiPropertiesKey: EnvironmentKey {
+  static var defaultValue: EmojiProperties { EmojiProperties() }
 }

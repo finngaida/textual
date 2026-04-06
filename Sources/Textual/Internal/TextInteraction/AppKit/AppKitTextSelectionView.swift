@@ -37,8 +37,12 @@
           }
         }
       }
-      .onChange(of: textSelectionModel?.selectedRange, initial: true, updateSelectionRects)
-      .onChange(of: layout, initial: true, updateSelectionRects)
+      .onChangeInitialCompat(of: textSelectionModel?.selectedRange) { _ in
+        updateSelectionRects()
+      }
+      .onChangeInitialCompat(of: layout) { _ in
+        updateSelectionRects()
+      }
     }
 
     private func updateSelectionRects() {

@@ -149,9 +149,9 @@ extension TextualNamespace where Base: View {
   @available(tvOS, unavailable)
   @available(watchOS, unavailable)
   @inlinable
-  public func textSelection(_ selectability: some TextSelectability) -> some View {
+  public func textSelection(_ selectability: TextSelectionMode) -> some View {
     #if TEXTUAL_ENABLE_TEXT_SELECTION
-      base.environment(\.textSelection, type(of: selectability))
+      base.environment(\.textSelection, selectability)
     #else
       base
     #endif

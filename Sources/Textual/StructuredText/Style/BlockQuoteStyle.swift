@@ -17,5 +17,14 @@ extension StructuredText {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var blockQuoteStyle: any StructuredText.BlockQuoteStyle = .default
+  var blockQuoteStyle: any StructuredText.BlockQuoteStyle {
+    get { self[BlockQuoteStyleKey.self] }
+    set { self[BlockQuoteStyleKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct BlockQuoteStyleKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: any StructuredText.BlockQuoteStyle { .default }
 }

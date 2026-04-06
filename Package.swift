@@ -6,7 +6,7 @@ let package = Package(
   name: "textual",
   platforms: [
     .macOS(.v15),
-    .iOS(.v18),
+    .iOS(.v17),
     .tvOS(.v18),
     .watchOS(.v11),
     .visionOS(.v2),
@@ -16,7 +16,6 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.3.1"),
-    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.7"),
     .package(url: "https://github.com/gonzalezreal/swiftui-math", from: "0.1.0"),
   ],
   targets: [
@@ -30,23 +29,9 @@ let package = Package(
         .process("Internal/Highlighter/Prism")
       ],
       swiftSettings: [
-        .define("TEXTUAL_ENABLE_LINKS", .when(platforms: [.macOS, .iOS, .watchOS, .visionOS])),
-        .define("TEXTUAL_ENABLE_TEXT_SELECTION", .when(platforms: [.macOS, .iOS, .visionOS])),
-      ]
-    ),
-    .testTarget(
-      name: "TextualTests",
-      dependencies: [
-        "Textual",
-        .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
-      ],
-      exclude: [
-        "Internal/TextInteraction/__Snapshots__",
-        "StructuredText/__Snapshots__",
-      ],
-      resources: [.copy("Fixtures")],
-      swiftSettings: [
-        .define("TEXTUAL_ENABLE_TEXT_SELECTION", .when(platforms: [.macOS, .iOS, .visionOS]))
+        .define("TEXTUAL_ENABLE_LINKS", .when(platforms: [.macOS])),
+        .define("TEXTUAL_ENABLE_TEXT_SELECTION", .when(platforms: [.macOS])),
+        .define("TEXTUAL_ENABLE_ADVANCED_TEXT_LAYOUT", .when(platforms: [.macOS])),
       ]
     ),
   ]

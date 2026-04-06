@@ -79,5 +79,14 @@ public struct InlineStyle: Sendable, Hashable {
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var inlineStyle: InlineStyle = .default
+  var inlineStyle: InlineStyle {
+    get { self[InlineStyleKey.self] }
+    set { self[InlineStyleKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct InlineStyleKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: InlineStyle { .default }
 }

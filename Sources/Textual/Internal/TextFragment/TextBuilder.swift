@@ -21,7 +21,7 @@ extension TextFragment {
     var text: Text
 
     @ObservationIgnored private let content: Content
-    @ObservationIgnored private let cache: NSCache<KeyBox<[AttachmentKey: CGSize]>, Box<Text>>
+    @ObservationIgnored private let cache: NSCache<KeyBox<AttachmentSizeCacheKey>, Box<Text>>
 
     init(_ content: Content, environment: TextEnvironmentValues) {
       let attachmentSizes = content.attachmentSizes(for: .unspecified, in: environment)
@@ -35,12 +35,12 @@ extension TextFragment {
       self.cache = NSCache()
       self.cache.countLimit = 10
 
-      self.cache.setObject(Box(self.text), forKey: KeyBox(attachmentSizes))
+      self.cache.setObject(Box(self.text), forKey: KeyBox(AttachmentSizeCacheKey(attachmentSizes)))
     }
 
     func sizeChanged(_ size: CGSize, environment: TextEnvironmentValues) {
       let attachmentSizes = content.attachmentSizes(for: .init(size), in: environment)
-      let cacheKey = KeyBox(attachmentSizes)
+      let cacheKey = KeyBox(AttachmentSizeCacheKey(attachmentSizes))
 
       if let text = cache.object(forKey: cacheKey) {
         self.text = text.wrappedValue
@@ -74,24 +74,34 @@ extension Text {
         AttachmentKey(attachment: $0, font: runEnvironment.font)
       }
 
-      if let key, let size = attachmentSizes[key] {
-        // Create placeholder
-        text = Text(placeholderSize: size)
-          .baselineOffset(key.attachment.baselineOffset(in: runEnvironment))
-          .customAttribute(
-            AttachmentAttribute(
-              key.attachment,
-              presentationIntent: run.presentationIntent
+      #if TEXTUAL_ENABLE_ADVANCED_TEXT_LAYOUT
+        if let key, let size = attachmentSizes[key] {
+          // Create placeholder
+          text = Text(placeholderSize: size)
+            .baselineOffset(key.attachment.baselineOffset(in: runEnvironment))
+            .customAttribute(
+              AttachmentAttribute(
+                key.attachment,
+                presentationIntent: run.presentationIntent
+              )
             )
-          )
-      } else {
-        text = Text(AttributedString(attributedString[run.range]))
-      }
+        } else {
+          text = Text(AttributedString(attributedString[run.range]))
+        }
+      #else
+        if let key {
+          text = Text(verbatim: key.attachment.description)
+        } else {
+          text = Text(AttributedString(attributedString[run.range]))
+        }
+      #endif
 
-      // Add link attribute for TextLinkInteraction
-      if let link = run.link {
-        text = text.customAttribute(LinkAttribute(link))
-      }
+      #if TEXTUAL_ENABLE_LINKS && TEXTUAL_ENABLE_ADVANCED_TEXT_LAYOUT
+        // Add link attribute for TextLinkInteraction
+        if let link = run.link {
+          text = text.customAttribute(LinkAttribute(link))
+        }
+      #endif
 
       return text
     }
@@ -133,4 +143,44 @@ extension AttributedStringProtocol {
 private struct AttachmentKey: Hashable {
   let attachment: AnyAttachment
   let font: Font?
+}
+
+private struct AttachmentSizeCacheKey: Hashable {
+  private let entries: [Entry]
+
+  init(_ sizes: [AttachmentKey: CGSize]) {
+    self.entries = sizes.map { Entry(key: $0.key, size: $0.value) }
+      .sorted { $0.sortKey < $1.sortKey }
+  }
+
+  private struct Entry: Hashable {
+    let key: AttachmentKey
+    let size: SizeKey
+    let sortKey: String
+
+    init(key: AttachmentKey, size: CGSize) {
+      self.key = key
+      self.size = SizeKey(size)
+      self.sortKey = "\(String(reflecting: key.attachment))|\(String(reflecting: key.font))"
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+      lhs.key == rhs.key && lhs.size == rhs.size
+    }
+
+    func hash(into hasher: inout Hasher) {
+      hasher.combine(key)
+      hasher.combine(size)
+    }
+  }
+
+  private struct SizeKey: Hashable {
+    let widthBits: UInt64
+    let heightBits: UInt64
+
+    init(_ size: CGSize) {
+      self.widthBits = Double(size.width).bitPattern
+      self.heightBits = Double(size.height).bitPattern
+    }
+  }
 }

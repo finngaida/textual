@@ -51,5 +51,12 @@ extension MathProperties.FontName {
 }
 
 extension EnvironmentValues {
-  @Entry var mathProperties = MathProperties()
+  var mathProperties: MathProperties {
+    get { self[MathPropertiesKey.self] }
+    set { self[MathPropertiesKey.self] = newValue }
+  }
+}
+
+private struct MathPropertiesKey: EnvironmentKey {
+  static var defaultValue: MathProperties { MathProperties() }
 }

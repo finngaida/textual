@@ -60,6 +60,13 @@ public struct Overflow<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
 
     case .scroll:
+      scrollContent
+    }
+  }
+
+  @ViewBuilder
+  private var scrollContent: some View {
+    #if TEXTUAL_ENABLE_ADVANCED_TEXT_LAYOUT
       ScrollView(.horizontal) {
         ZStack {
           // Update the scroll view height when the content height changes
@@ -89,11 +96,24 @@ public struct Overflow<Content: View>: View {
             )
         }
       )
-    }
+    #else
+      ScrollView(.horizontal) {
+        content(.scroll(containerWidth: nil))
+      }
+    #endif
   }
 }
 
 extension EnvironmentValues {
   @usableFromInline
-  @Entry var overflowMode = OverflowMode.scroll
+  var overflowMode: OverflowMode {
+    get { self[OverflowModeKey.self] }
+    set { self[OverflowModeKey.self] = newValue }
+  }
+}
+
+@usableFromInline
+struct OverflowModeKey: EnvironmentKey {
+  @usableFromInline
+  static var defaultValue: OverflowMode { .scroll }
 }

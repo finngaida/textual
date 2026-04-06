@@ -36,33 +36,44 @@ struct TextFragment<Content: AttributedStringProtocol>: View {
   }
 
   var body: some View {
-    text
-      .customAttribute(TextFragmentAttribute())
-      .onGeometryChange(for: CGSize?.self, of: \.textContainerSize) { size in
-        guard let size, let textBuilder else { return }
-        textBuilder.sizeChanged(size, environment: textEnvironment)
-      }
-      .onChange(of: content, initial: true) { _, newValue in
+    fragmentContent
+      .onChangeInitialCompat(of: content) { newValue in
         self.textBuilder = TextBuilder(newValue, environment: textEnvironment)
       }
-      .modifier(TextSelectionBackground())
-      .modifier(AttachmentOverlay(attachments: content.attachments()))
-      .modifier(TextLinkInteraction())
   }
 
   private var text: Text {
     textBuilder?.text ?? Text(verbatim: "")
   }
-}
 
-struct TextFragmentAttribute: TextAttribute {
-}
-
-extension Text.Layout {
-  var isTextFragment: Bool {
-    first?.first?[TextFragmentAttribute.self] != nil
+  @ViewBuilder
+  private var fragmentContent: some View {
+    #if TEXTUAL_ENABLE_ADVANCED_TEXT_LAYOUT
+      text
+        .customAttribute(TextFragmentAttribute())
+        .onGeometryChange(for: CGSize?.self, of: \.textContainerSize) { size in
+          guard let size, let textBuilder else { return }
+          textBuilder.sizeChanged(size, environment: textEnvironment)
+        }
+        .modifier(TextSelectionBackground())
+        .modifier(AttachmentOverlay(attachments: content.attachments()))
+        .modifier(TextLinkInteraction())
+    #else
+      text
+    #endif
   }
 }
+
+#if TEXTUAL_ENABLE_ADVANCED_TEXT_LAYOUT
+  struct TextFragmentAttribute: TextAttribute {
+  }
+
+  extension Text.Layout {
+    var isTextFragment: Bool {
+      first?.first?[TextFragmentAttribute.self] != nil
+    }
+  }
+#endif
 
 extension CoordinateSpaceProtocol where Self == NamedCoordinateSpace {
   static var textContainer: NamedCoordinateSpace {
